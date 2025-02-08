@@ -1,74 +1,71 @@
+import os
 import pandas as pd
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
+# Ensure the "models" folder exists
+model_folder = r""
+os.makedirs(model_folder, exist_ok=True)
 
-# Load processed dataset
-df = pd.read_csv("J:\John Alvarado\Documents\projects\AI-Powered Financial Risk Modeling System\AI-Powered-Financial-Risk-Modeling-System\data\processed_data.csv")
+# Load processed data
+data_path = r""
+try:
+    df = pd.read_csv(data_path)
+except FileNotFoundError:
+    raise Exception(f"File '{data_path}' not found. Run feature_engineering.py first.")
 
+# Strip any whitespace from column names.
+df.columns = df.columns.str.strip()
 
-# Define a function to compute a risk label based on technical indicators
+# Define a function to compute a risk label based on technical indicators.
 def compute_risk_label(row):
-    """
-    Heuristic to compute a risk label:
-      - If RSI is in an extreme region (<30 or >70), add 1 point.
-      - If SMA_50 is below SMA_200 (suggesting a bearish trend), add 1 point.
-      - If the absolute MACD is greater than 1 (indicating significant momentum), add 1 point.
-    
-    Risk label mapping:
-      - 0 points: Low Risk (0)
-      - 1 point : Medium Risk (1)
-      - 2 or more points: High Risk (2)
-    """
     risk_score = 0
-    
-    # RSI-based risk
     if row["RSI"] < 30 or row["RSI"] > 70:
         risk_score += 1
-
-    # Trend-based risk: if SMA_50 is below SMA_200, this might indicate a downward trend.
     if row["SMA_50"] < row["SMA_200"]:
         risk_score += 1
-
-    # MACD-based risk: significant momentum indicated by |MACD| > 1
     if abs(row["MACD"]) > 1:
         risk_score += 1
 
-    # Map risk_score to risk label: 0 = Low, 1 = Medium, 2 = High
     if risk_score == 0:
-        return 0   # Low risk
+        return 0  # Low risk
     elif risk_score == 1:
-        return 1   # Medium risk
+        return 1  # Medium risk
     else:
-        return 2   # High risk
+        return 2  # High risk
 
-# Apply the risk labeling function to each row of the DataFrame
+# Ensure necessary columns exist.
+required_cols = ["SMA_50", "SMA_200", "RSI", "MACD"]
+if not all(col in df.columns for col in required_cols):
+    raise Exception("Processed data does not contain all required feature columns.")
+
 df["Risk_Label"] = df.apply(compute_risk_label, axis=1)
 
-# Define features & target
-X = df[["SMA_50", "SMA_200", "RSI", "MACD"]]
-y = df["Risk_Label"]  # Risk classification: 0 = Low, 1 = Medium, 2 = High
+# Define features and target.
+X = df[required_cols]
+y = df["Risk_Label"]
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
+# Split into training and testing sets.
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Train a GPU-enabled XGBoost model
-model = xgb.XGBClassifier(
-    use_label_encoder=False,
-    eval_metric="mlogloss",
-    tree_method="gpu_hist",       # GPU-accelerated training
-    predictor="gpu_predictor"     # GPU-accelerated inference
-)
-
+# Initialize the XGBoost classifier.
+model_params = {
+    "use_label_encoder": False,
+    "eval_metric": "mlogloss",
+    # Uncomment the GPU options if you have a compatible GPU:
+    # "tree_method": "gpu_hist",
+    # "predictor": "gpu_predictor"
+}
+model = xgb.XGBClassifier(**model_params)
 model.fit(X_train, y_train)
 
-# Evaluate the model
+# Evaluate the model.
 y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Model Accuracy: {accuracy:.2f}")
 
-# Save model
-model.save_model("J:/John Alvarado/Documents/projects/AI-Powered Financial Risk Modeling System/AI-Powered-Financial-Risk-Modeling-System/models/financial_risk_model.json")
+# Save the trained model.
+model_save_path = os.path.join(model_folder, "financial_risk_model.json")
+model.save_model(model_save_path)
+print("Model training complete. Model saved in the 'models' folder.")

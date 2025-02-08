@@ -1,26 +1,38 @@
+import os
 import pandas as pd
 import ta  # Technical Analysis Library
 
-# Load data
-df = pd.read_csv("J:\John Alvarado\Documents\projects\AI-Powered Financial Risk Modeling System\AI-Powered-Financial-Risk-Modeling-System\data\stock_data.csv")
+# Ensure the "data" folder exists
+data_folder = r""
+os.makedirs(data_folder, exist_ok=True)
 
-# If your CSV has extra rows (like "Ticker", "Date" as data), try adjusting skiprows:
-# df = pd.read_csv("data/stock_data.csv", skiprows=1)
+# Load stock data.
+# Skip extra header rows (assumed to be at row indices 1 and 2).
+stock_csv = os.path.join(data_folder, "stock_data.csv")
+try:
+    df = pd.read_csv(stock_csv, skiprows=[1, 2])
+except FileNotFoundError:
+    raise Exception("File 'stock_data.csv' not found. Run data_ingestion.py first.")
 
-# Ensure numeric columns to avoid "No numeric types to aggregate" errors
-for col in ["Open", "High", "Low", "Close", "Adj Close", "Volume"]:
+# Strip whitespace from column names
+df.columns = df.columns.str.strip()
+
+# Convert expected numeric columns to numeric types.
+numeric_cols = ["Open", "High", "Low", "Close", "Adj Close", "Volume"]
+for col in numeric_cols:
     if col in df.columns:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-# Calculate moving averages
-df["SMA_50"] = ta.trend.sma_indicator(df["Close"], window=50)
-df["SMA_200"] = ta.trend.sma_indicator(df["Close"], window=200)
+# Calculate technical indicators only if "Close" exists.
+if "Close" in df.columns:
+    df["SMA_50"] = ta.trend.sma_indicator(df["Close"], window=50)
+    df["SMA_200"] = ta.trend.sma_indicator(df["Close"], window=200)
+    df["RSI"] = ta.momentum.rsi(df["Close"], window=14)
+    df["MACD"] = ta.trend.macd(df["Close"])
+else:
+    raise Exception("Column 'Close' not found in the dataset. Please check your CSV file.")
 
-# Compute Relative Strength Index (RSI)
-df["RSI"] = ta.momentum.rsi(df["Close"], window=14)
-
-# Compute MACD
-df["MACD"] = ta.trend.macd(df["Close"])
-
-# Save processed data
-df.to_csv("J:\John Alvarado\Documents\projects\AI-Powered Financial Risk Modeling System\AI-Powered-Financial-Risk-Modeling-System\data\processed_data.csv", index=False)
+# Save the processed data.
+processed_csv = os.path.join(data_folder, "processed_data.csv")
+df.to_csv(processed_csv, index=False)
+print(f"Feature engineering complete. Processed data saved as '{processed_csv}'.")

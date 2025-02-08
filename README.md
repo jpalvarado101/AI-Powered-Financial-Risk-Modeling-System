@@ -1,7 +1,3 @@
-I'll first generate an **impressive GitHub README** for your project, and then I'll provide **the full code** for all the components of your financial risk modeling system.
-
----
-
 # 📌 **GitHub README: AI-Powered Financial Risk Modeling System**
 
 ````markdown
@@ -29,7 +25,7 @@ This project is an **end-to-end AI-powered financial risk assessment system** th
 
 ## 🚀 **Project Architecture**
 
-```plaintext
+```
 financial-risk-modeling/
 │── data/                     # Raw and processed datasets
 │── models/                   # Trained ML models

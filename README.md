@@ -1,4 +1,4 @@
-# 📌 **I-Powered Financial Risk Modeling System**
+# 📌 **AI-Powered Financial Risk Modeling System**
 
 ````markdown
 # 🔥 AI-Powered Financial Risk Modeling System 🔥

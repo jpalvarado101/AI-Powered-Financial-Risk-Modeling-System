@@ -1,4 +1,4 @@
-# 📌 **GitHub README: AI-Powered Financial Risk Modeling System**
+# 📌 **I-Powered Financial Risk Modeling System**
 
 ````markdown
 # 🔥 AI-Powered Financial Risk Modeling System 🔥

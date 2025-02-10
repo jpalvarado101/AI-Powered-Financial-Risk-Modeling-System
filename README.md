@@ -127,14 +127,4 @@ streamlit run src/streamlit_dashboard/app.py
 
 ```
 
----
 
-### **🔗 Next Steps**
-Now, I’ll generate the **full project code** for you, covering:
-✅ **Data Ingestion & Preprocessing**
-✅ **Feature Engineering**
-✅ **Model Training & Evaluation**
-✅ **SHAP Explainability**
-✅ **API for Model Deployment**
-✅ **Streamlit Dashboard for Risk Monitoring**
-```

@@ -125,6 +125,6 @@ streamlit run src/streamlit_dashboard/app.py
 📧 **Contact:** [contact@johnferreralvarado.com] | 💼 **LinkedIn:** [[My Profile](https://www.linkedin.com/in/johnfalvarado/)]  
 ⭐ **Star the repo if you find this useful!** ⭐
 
-```
+
 
 
